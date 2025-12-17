@@ -35,8 +35,15 @@ public class MainFrame extends JFrame {
     private JProgressBar progressBar;
     private JLabel statusLabel;
 
+    // Меню
+    private JMenuBar menuBar;
+    private JMenu helpMenu;
+    private JMenuItem authorMenuItem;
+    private JMenuItem themeMenuItem;
+
     public MainFrame() {
         initComponents();
+        setupMenu();
         setupLayout();
         setupWindow();
     }
@@ -91,6 +98,77 @@ public class MainFrame extends JFrame {
 
         statusLabel = new JLabel("Готово");
         statusLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    }
+
+    private void setupMenu() {
+        menuBar = new JMenuBar();
+
+        // Создаем меню "Справка"
+        helpMenu = new JMenu("Справка");
+        helpMenu.setMnemonic('С'); // Горячая клавиша Alt+С
+
+        // Пункт меню "Автор"
+        authorMenuItem = new JMenuItem("Автор", new ImageIcon("src/main/resources/author.png"));
+        authorMenuItem.setMnemonic('А'); // Горячая клавиша Alt+А
+        authorMenuItem.setAccelerator(KeyStroke.getKeyStroke("ctrl shift A"));
+        authorMenuItem.addActionListener(e -> showAuthorInfo());
+
+        // Пункт меню "Тема"
+        themeMenuItem = new JMenuItem("Тема", new ImageIcon("src/main/resources/theme.png"));
+        themeMenuItem.setMnemonic('Т'); // Горячая клавиша Alt+Т
+        themeMenuItem.setAccelerator(KeyStroke.getKeyStroke("ctrl shift T"));
+        themeMenuItem.addActionListener(e -> showThemeInfo());
+
+        // Добавляем пункты в меню
+        helpMenu.add(authorMenuItem);
+        helpMenu.add(themeMenuItem);
+
+        // Добавляем меню в меню-бар
+        menuBar.add(helpMenu);
+
+        // Устанавливаем меню-бар для окна
+        setJMenuBar(menuBar);
+    }
+
+    private void showAuthorInfo() {
+        String authorInfo = "<html><body style='width: 300px; padding: 10px;'>" +
+                "<h2 style='text-align: center; color: #2c3e50;'>Автор</h2>" +
+                "<div style='text-align: center;'>" +
+                "<p style='font-size: 16px; font-weight: bold; color: #3498db;'>Соколовский Николай</p>" +
+                "<p style='font-size: 14px; color: #7f8c8d;'>Студент группы ИП-213</p>" +
+                "</div></body></html>";
+
+        JLabel label = new JLabel(authorInfo);
+        JOptionPane.showMessageDialog(this, label, "Об авторе",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void showThemeInfo() {
+        String themeText = "<html><body style='width: 500px; padding: 10px;'>" +
+                "<h2 style='text-align: center; color: #2c3e50;'>Тема 1. Построение конструкций, задающих язык</h2>" +
+                "<hr>" +
+                "<div style='font-size: 12px; line-height: 1.5;'>" +
+                "<p><b>Общее описание для всех тем блока:</b></p>" +
+                "<p>Написать программу, которая по предложенному описанию языка построит " +
+                "регулярную грамматику (ЛЛ или ПЛ – по выбору пользователя), задающую этот " +
+                "язык, и позволит сгенерировать с её помощью все цепочки языка в заданном " +
+                "диапазоне длин.</p>" +
+                "<p>Предусмотреть возможность поэтапного отображения на экране процесса " +
+                "генерации цепочек.</p>" +
+                "<p><b>Язык задается следующими параметрами:</b></p>" +
+                "<ul>" +
+                "<li><b>Алфавит</b> - набор допустимых символов</li>" +
+                "<li><b>Начальная подцепочка</b> - обязательное начало всех цепочек</li>" +
+                "<li><b>Конечная подцепочка</b> - обязательное окончание всех цепочек</li>" +
+                "<li><b>Кратность длины</b> - длина всех цепочек должна быть кратна этому числу</li>" +
+                "</ul>" +
+                "<p style='margin-top: 20px; font-size: 11px; color: #95a5a6; text-align: center;'>" +
+                "© Учебный проект по теории формальных языков</p>" +
+                "</div></body></html>";
+
+        JLabel label = new JLabel(themeText);
+        JOptionPane.showMessageDialog(this, label, "Тема проекта",
+                JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void setupLayout() {
@@ -306,6 +384,15 @@ public class MainFrame extends JFrame {
 
     public void setClearListener(ActionListener listener) {
         clearButton.addActionListener(listener);
+    }
+
+    // Методы для установки слушателей меню (опционально, если нужно будет контроллеру)
+    public void setAuthorMenuListener(ActionListener listener) {
+        authorMenuItem.addActionListener(listener);
+    }
+
+    public void setThemeMenuListener(ActionListener listener) {
+        themeMenuItem.addActionListener(listener);
     }
 
     // Валидация ввода
