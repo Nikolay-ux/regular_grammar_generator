@@ -7,7 +7,6 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 
 public class MainFrame extends JFrame {
-    // Компоненты ввода
     private JTextField alphabetField;
     private JTextField initialChainField;
     private JTextField finalChainField;
@@ -16,14 +15,12 @@ public class MainFrame extends JFrame {
     private JSpinner minLengthSpinner;
     private JSpinner maxLengthSpinner;
 
-    // Кнопки
     private JButton generateGrammarButton;
     private JButton generateChainsButton;
     private JButton stepByStepButton;
     private JButton exportButton;
     private JButton clearButton;
 
-    // Области вывода
     private JTextArea grammarRulesArea;
     private JTextArea formalDefinitionArea;
     private JTable chainsTable;
@@ -31,11 +28,9 @@ public class MainFrame extends JFrame {
     private JTextArea stepsArea;
     private JTextArea currentChainArea;
 
-    // Панели
     private JProgressBar progressBar;
     private JLabel statusLabel;
 
-    // Меню
     private JMenuBar menuBar;
     private JMenu helpMenu;
     private JMenuItem authorMenuItem;
@@ -49,7 +44,6 @@ public class MainFrame extends JFrame {
     }
 
     private void initComponents() {
-        // Поля ввода
         alphabetField = new JTextField(30);
         initialChainField = new JTextField(20);
         finalChainField = new JTextField(20);
@@ -60,14 +54,12 @@ public class MainFrame extends JFrame {
         minLengthSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 100, 1));
         maxLengthSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
 
-        // Кнопки
         generateGrammarButton = new JButton("Построить грамматику");
         generateChainsButton = new JButton("Сгенерировать цепочки");
         stepByStepButton = new JButton("Пошаговый вывод");
         exportButton = new JButton("Экспорт результатов");
         clearButton = new JButton("Очистить всё");
 
-        // Области вывода
         grammarRulesArea = new JTextArea(15, 40);
         grammarRulesArea.setEditable(false);
         grammarRulesArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
@@ -76,7 +68,6 @@ public class MainFrame extends JFrame {
         formalDefinitionArea.setEditable(false);
         formalDefinitionArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
-        // Таблица цепочек
         chainsTableModel = new DefaultTableModel(
                 new Object[]{"№", "Цепочка", "Длина", "Соответствие правилам"}, 0
         );
@@ -92,7 +83,6 @@ public class MainFrame extends JFrame {
         currentChainArea.setFont(new Font("Monospaced", Font.BOLD, 12));
         currentChainArea.setBackground(new Color(240, 240, 240));
 
-        // Статусные компоненты
         progressBar = new JProgressBar();
         progressBar.setVisible(false);
 
@@ -103,30 +93,24 @@ public class MainFrame extends JFrame {
     private void setupMenu() {
         menuBar = new JMenuBar();
 
-        // Создаем меню "Справка"
         helpMenu = new JMenu("Справка");
-        helpMenu.setMnemonic('С'); // Горячая клавиша Alt+С
+        helpMenu.setMnemonic('С');
 
-        // Пункт меню "Автор"
         authorMenuItem = new JMenuItem("Автор", new ImageIcon("src/main/resources/author.png"));
-        authorMenuItem.setMnemonic('А'); // Горячая клавиша Alt+А
+        authorMenuItem.setMnemonic('А');
         authorMenuItem.setAccelerator(KeyStroke.getKeyStroke("ctrl shift A"));
         authorMenuItem.addActionListener(e -> showAuthorInfo());
 
-        // Пункт меню "Тема"
         themeMenuItem = new JMenuItem("Тема", new ImageIcon("src/main/resources/theme.png"));
-        themeMenuItem.setMnemonic('Т'); // Горячая клавиша Alt+Т
+        themeMenuItem.setMnemonic('Т');
         themeMenuItem.setAccelerator(KeyStroke.getKeyStroke("ctrl shift T"));
         themeMenuItem.addActionListener(e -> showThemeInfo());
 
-        // Добавляем пункты в меню
         helpMenu.add(authorMenuItem);
         helpMenu.add(themeMenuItem);
 
-        // Добавляем меню в меню-бар
         menuBar.add(helpMenu);
 
-        // Устанавливаем меню-бар для окна
         setJMenuBar(menuBar);
     }
 
@@ -162,8 +146,6 @@ public class MainFrame extends JFrame {
                 "<li><b>Конечная подцепочка</b> - обязательное окончание всех цепочек</li>" +
                 "<li><b>Кратность длины</b> - длина всех цепочек должна быть кратна этому числу</li>" +
                 "</ul>" +
-                "<p style='margin-top: 20px; font-size: 11px; color: #95a5a6; text-align: center;'>" +
-                "© Учебный проект по теории формальных языков</p>" +
                 "</div></body></html>";
 
         JLabel label = new JLabel(themeText);
@@ -174,21 +156,16 @@ public class MainFrame extends JFrame {
     private void setupLayout() {
         setLayout(new BorderLayout(10, 10));
 
-        // Панель ввода параметров
         JPanel inputPanel = createInputPanel();
 
-        // Панель кнопок управления
         JPanel controlPanel = createControlPanel();
 
-        // Панель с результатами (вкладки)
         JTabbedPane resultsTabbedPane = createResultsTabbedPane();
 
-        // Панель статуса
         JPanel statusPanel = new JPanel(new BorderLayout());
         statusPanel.add(progressBar, BorderLayout.CENTER);
         statusPanel.add(statusLabel, BorderLayout.EAST);
 
-        // Сборка главного окна
         JPanel northPanel = new JPanel(new BorderLayout());
         northPanel.add(inputPanel, BorderLayout.CENTER);
         northPanel.add(controlPanel, BorderLayout.SOUTH);
@@ -207,37 +184,31 @@ public class MainFrame extends JFrame {
 
         int row = 0;
 
-        // Алфавит
         gbc.gridx = 0; gbc.gridy = row;
         panel.add(new JLabel("Алфавит (символы без пробелов):"), gbc);
         gbc.gridx = 1;
         panel.add(alphabetField, gbc);
 
-        // Начальная подцепочка
         gbc.gridx = 0; gbc.gridy = ++row;
         panel.add(new JLabel("Начальная подцепочка:"), gbc);
         gbc.gridx = 1;
         panel.add(initialChainField, gbc);
 
-        // Конечная подцепочка
         gbc.gridx = 0; gbc.gridy = ++row;
         panel.add(new JLabel("Конечная подцепочка:"), gbc);
         gbc.gridx = 1;
         panel.add(finalChainField, gbc);
 
-        // Кратность длины
         gbc.gridx = 0; gbc.gridy = ++row;
         panel.add(new JLabel("Кратность длины:"), gbc);
         gbc.gridx = 1;
         panel.add(multiplicitySpinner, gbc);
 
-        // Тип грамматики
         gbc.gridx = 0; gbc.gridy = ++row;
         panel.add(new JLabel("Тип грамматики:"), gbc);
         gbc.gridx = 1;
         panel.add(grammarTypeCombo, gbc);
 
-        // Диапазон длин
         gbc.gridx = 0; gbc.gridy = ++row;
         panel.add(new JLabel("Диапазон длин:"), gbc);
         gbc.gridx = 1;
@@ -267,25 +238,21 @@ public class MainFrame extends JFrame {
     private JTabbedPane createResultsTabbedPane() {
         JTabbedPane tabbedPane = new JTabbedPane();
 
-        // Вкладка с правилами грамматики
         JPanel grammarPanel = new JPanel(new BorderLayout());
         grammarPanel.add(new JLabel("Правила грамматики:"), BorderLayout.NORTH);
         grammarPanel.add(new JScrollPane(grammarRulesArea), BorderLayout.CENTER);
         tabbedPane.addTab("Правила грамматики", grammarPanel);
 
-        // Вкладка с формальным определением
         JPanel formalDefPanel = new JPanel(new BorderLayout());
         formalDefPanel.add(new JLabel("Формальное определение грамматики:"), BorderLayout.NORTH);
         formalDefPanel.add(new JScrollPane(formalDefinitionArea), BorderLayout.CENTER);
         tabbedPane.addTab("Формальное определение", formalDefPanel);
 
-        // Вкладка с цепочками
         JPanel chainsPanel = new JPanel(new BorderLayout());
         chainsPanel.add(new JLabel("Сгенерированные цепочки:"), BorderLayout.NORTH);
         chainsPanel.add(new JScrollPane(chainsTable), BorderLayout.CENTER);
         tabbedPane.addTab("Цепочки языка", chainsPanel);
 
-        // Вкладка с шагами генерации
         JPanel stepsPanel = new JPanel(new BorderLayout());
         JPanel stepsTopPanel = new JPanel(new BorderLayout());
         stepsTopPanel.add(new JLabel("Текущая цепочка:"), BorderLayout.NORTH);
@@ -305,16 +272,13 @@ public class MainFrame extends JFrame {
         setSize(1200, 800);
         setLocationRelativeTo(null);
 
-        // Устанавливаем иконку
         try {
             setIconImage(Toolkit.getDefaultToolkit().getImage(
                     getClass().getResource("/icon.png")));
         } catch (Exception e) {
-            // Иконка не найдена, это не критично
         }
     }
 
-    // Геттеры для полей ввода
     public String getAlphabetText() { return alphabetField.getText().trim(); }
     public String getInitialChain() { return initialChainField.getText().trim(); }
     public String getFinalChain() { return finalChainField.getText().trim(); }
@@ -323,7 +287,6 @@ public class MainFrame extends JFrame {
     public int getMinLength() { return (Integer) minLengthSpinner.getValue(); }
     public int getMaxLength() { return (Integer) maxLengthSpinner.getValue(); }
 
-    // Сеттеры для вывода
     public void setGrammarRules(String text) { grammarRulesArea.setText(text); }
     public void setFormalDefinition(String text) { formalDefinitionArea.setText(text); }
     public void setCurrentChain(String text) { currentChainArea.setText(text); }
@@ -331,7 +294,6 @@ public class MainFrame extends JFrame {
     public void appendStep(String text) { stepsArea.append(text + "\n"); }
     public void clearSteps() { stepsArea.setText(""); }
 
-    // Методы для работы с таблицей цепочек
     public void clearChainsTable() {
         chainsTableModel.setRowCount(0);
     }
@@ -345,7 +307,6 @@ public class MainFrame extends JFrame {
         });
     }
 
-    // Методы для управления состоянием UI
     public void showProgress(boolean show) {
         progressBar.setVisible(show);
         progressBar.setIndeterminate(show);
@@ -365,7 +326,6 @@ public class MainFrame extends JFrame {
         statusLabel.setForeground(new Color(0, 100, 0));
     }
 
-    // Методы для установки слушателей
     public void setGenerateGrammarListener(ActionListener listener) {
         generateGrammarButton.addActionListener(listener);
     }
@@ -386,16 +346,6 @@ public class MainFrame extends JFrame {
         clearButton.addActionListener(listener);
     }
 
-    // Методы для установки слушателей меню (опционально, если нужно будет контроллеру)
-    public void setAuthorMenuListener(ActionListener listener) {
-        authorMenuItem.addActionListener(listener);
-    }
-
-    public void setThemeMenuListener(ActionListener listener) {
-        themeMenuItem.addActionListener(listener);
-    }
-
-    // Валидация ввода
     public boolean validateInput() {
         if (getAlphabetText().isEmpty()) {
             JOptionPane.showMessageDialog(this,

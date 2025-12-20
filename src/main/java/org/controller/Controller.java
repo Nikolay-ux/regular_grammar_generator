@@ -38,7 +38,6 @@ public class Controller {
     }
 
     private void initializeUI() {
-        // Устанавливаем значения по умолчанию
         view.setGrammarRules("Грамматика еще не построена");
         view.setFormalDefinition("Формальное определение будет отображено после построения грамматики");
         view.setCurrentChain("Текущая цепочка будет отображена здесь");
@@ -51,14 +50,12 @@ public class Controller {
         }
 
         try {
-            // Получаем параметры из UI
             String alphabetText = view.getAlphabetText();
             String initialChain = view.getInitialChain();
             String finalChain = view.getFinalChain();
             int multiplicity = view.getMultiplicity();
             GrammarType type = view.getGrammarType();
 
-            // Преобразуем алфавит в множество символов
             Set<Character> alphabet = parseAlphabet(alphabetText);
 
             if (alphabet.isEmpty()) {
@@ -66,7 +63,6 @@ public class Controller {
                 return;
             }
 
-            // Проверяем, что начальная и конечная цепочки состоят из символов алфавита
             if (!validateChain(initialChain, alphabet)) {
                 view.setErrorStatus("Начальная цепочка содержит символы не из алфавита");
                 return;
@@ -77,10 +73,8 @@ public class Controller {
                 return;
             }
 
-            // Создаем грамматику
             grammar = new RegularGrammar(type, alphabet, initialChain, finalChain, multiplicity);
 
-            // Отображаем правила грамматики
             displayGrammar();
 
             view.setSuccessStatus("Грамматика успешно построена");
@@ -117,7 +111,6 @@ public class Controller {
     private void displayGrammar() {
         if (grammar == null) return;
 
-        // Отображаем правила грамматики
         StringBuilder rulesText = new StringBuilder();
         rulesText.append("Тип грамматики: ").append(grammar.getType()).append("\n\n");
         rulesText.append("Правила грамматики:\n");
@@ -129,7 +122,6 @@ public class Controller {
 
         view.setGrammarRules(rulesText.toString());
 
-        // Отображаем формальное определение
         view.setFormalDefinition(grammar.getFormalDefinition());
     }
 
@@ -150,11 +142,9 @@ public class Controller {
                 return;
             }
 
-            // Показываем прогресс
             view.showProgress(true);
             view.setStatus("Генерация цепочек...");
 
-            // Запускаем генерацию в отдельном потоке
             SwingWorker<List<String>, Void> worker = new SwingWorker<>() {
                 @Override
                 protected List<String> doInBackground() throws Exception {
@@ -192,7 +182,6 @@ public class Controller {
         for (int i = 0; i < generatedChains.size(); i++) {
             String chain = generatedChains.get(i);
 
-            // Проверяем, что цепочка соответствует всем условиям
             boolean valid = true;
             if (!chain.startsWith(grammar.getInitialChain())) {
                 valid = false;
@@ -207,7 +196,6 @@ public class Controller {
             view.addChainToTable(i + 1, chain, valid);
         }
 
-        // Если цепочек нет, показываем сообщение
         if (generatedChains.isEmpty()) {
             view.addChainToTable(1, "Цепочки не найдены", false);
         }
@@ -225,11 +213,9 @@ public class Controller {
             stepTimer.stop();
         }
 
-        // Начинаем с первой цепочки
         currentChainIndex = 0;
         currentStepIndex = 0;
 
-        // Получаем шаги генерации для первой цепочки
         if (chainGenerator != null) {
             currentChainSteps = chainGenerator.getStepsForChain(
                     generatedChains.get(currentChainIndex));
@@ -237,11 +223,9 @@ public class Controller {
             currentChainSteps = new ArrayList<>();
         }
 
-        // Очищаем область шагов
         view.clearSteps();
         view.setCurrentChain("Выберите цепочку для пошагового просмотра");
 
-        // Создаем диалог для выбора цепочки
         String[] chainArray = generatedChains.toArray(new String[0]);
         String selectedChain = (String) JOptionPane.showInputDialog(view,
                 "Выберите цепочку для пошаговой генерации:",
@@ -268,13 +252,11 @@ public class Controller {
         }
 
         if (currentChainSteps.isEmpty()) {
-            // Если нет шагов, создаем искусственные
             createSimulatedSteps(chain);
         }
 
         currentStepIndex = 0;
 
-        // Запускаем таймер для пошагового отображения
         stepTimer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -295,20 +277,17 @@ public class Controller {
     private void createSimulatedSteps(String chain) {
         currentChainSteps = new ArrayList<>();
 
-        // Создаем имитацию шагов для цепочки
         String current = "S";
         int step = 1;
 
         currentChainSteps.add(new ChainGenerationStep(step++, current, "Начало"));
 
-        // Применяем начальное правило
         if (!grammar.getInitialChain().isEmpty()) {
             current = grammar.getInitialChain() + "A";
             currentChainSteps.add(new ChainGenerationStep(step++, current,
                     "Применено правило S → " + grammar.getInitialChain() + "A"));
         }
 
-        // Генерируем среднюю часть
         int middleLength = chain.length() -
                 grammar.getInitialChain().length() -
                 grammar.getFinalChain().length();
@@ -319,7 +298,6 @@ public class Controller {
                     "Применено правило A → aA"));
         }
 
-        // Применяем конечное правило
         if (!grammar.getFinalChain().isEmpty()) {
             current = current.replace("A", grammar.getFinalChain());
             currentChainSteps.add(new ChainGenerationStep(step++, current,

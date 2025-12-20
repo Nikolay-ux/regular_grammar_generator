@@ -1,7 +1,6 @@
 package org.model;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ChainGenerator {
     private final RegularGrammar grammar;
@@ -21,10 +20,9 @@ public class ChainGenerator {
                 .comparingInt(String::length)
                 .thenComparing(s -> s));
 
-        // Генерируем цепочки для каждой допустимой длины
         for (int length = minLength; length <= maxLength; length++) {
             if (length % grammar.getLengthMultiplicity() != 0) {
-                continue; // Пропускаем длины, не кратные заданной кратности
+                continue;
             }
 
             generateChainsOfLength("S", length, result, new ArrayList<>(), 0);
@@ -35,22 +33,18 @@ public class ChainGenerator {
 
     private void generateChainsOfLength(String current, int targetLength,
                                         Set<String> result, List<String> path, int depth) {
-        // Защита от бесконечной рекурсии
         if (depth > targetLength * 2 || current.length() > targetLength * 2) {
             return;
         }
 
         String memoKey = current + "|" + targetLength;
         if (memoization.containsKey(memoKey)) {
-            // Уже генерировали для этой комбинации
             return;
         }
 
-        // Если текущая цепочка достигла нужной длины и содержит только терминалы
         if (current.length() == targetLength && isTerminalString(current)) {
             if (isValidChain(current)) {
                 result.add(current);
-                // Сохраняем путь генерации
                 List<String> fullPath = new ArrayList<>(path);
                 fullPath.add(current);
                 recordGenerationSteps(fullPath);
@@ -59,23 +53,19 @@ public class ChainGenerator {
             return;
         }
 
-        // Если превысили длину, останавливаемся
         if (current.length() > targetLength) {
             memoization.put(memoKey, new HashSet<>());
             return;
         }
 
-        // Находим все возможные применения правил
         List<String> nextChains = new ArrayList<>();
 
         for (int i = 0; i < current.length(); i++) {
             if (Character.isUpperCase(current.charAt(i))) {
-                // Нашли нетерминал
                 char nonTerminal = current.charAt(i);
                 String prefix = current.substring(0, i);
                 String suffix = current.substring(i + 1);
 
-                // Применяем все подходящие правила
                 for (GrammarRule rule : grammar.getRules()) {
                     if (rule.getLeftPart().charAt(0) == nonTerminal) {
                         String newChain = prefix + rule.getRightPart() + suffix;
@@ -83,16 +73,13 @@ public class ChainGenerator {
                     }
                 }
 
-                // Для левосторонней грамматики важно обрабатывать самый левый нетерминал
                 if (grammar.getType() == GrammarType.LEFT_LINEAR) {
                     break;
                 }
             }
         }
 
-        // Если нет нетерминалов, но длина не достигнута
         if (nextChains.isEmpty() && !isTerminalString(current)) {
-            // Попытка завершить нетерминалы пустыми правилами
             for (GrammarRule rule : grammar.getRules()) {
                 if (rule.getRightPart().isEmpty()) {
                     for (int i = 0; i < current.length(); i++) {
@@ -105,14 +92,12 @@ public class ChainGenerator {
             }
         }
 
-        // Рекурсивно обрабатываем следующие цепочки
         Set<String> generated = new HashSet<>();
         for (String nextChain : nextChains) {
             List<String> newPath = new ArrayList<>(path);
             newPath.add(nextChain);
             generateChainsOfLength(nextChain, targetLength, result, newPath, depth + 1);
 
-            // Запоминаем, что генерировали
             generated.add(nextChain);
         }
 
@@ -129,7 +114,6 @@ public class ChainGenerator {
     }
 
     private boolean isValidChain(String chain) {
-        // Проверяем все условия для цепочки
         if (!chain.startsWith(grammar.getInitialChain())) {
             return false;
         }
@@ -140,7 +124,6 @@ public class ChainGenerator {
             return false;
         }
 
-        // Проверяем, что все символы из алфавита
         for (char c : chain.toCharArray()) {
             if (!grammar.getAlphabet().contains(c)) {
                 return false;
@@ -159,9 +142,7 @@ public class ChainGenerator {
     }
 
     private String findAppliedRule(String from, String to) {
-        // Находим правило, которое преобразовало from в to
         for (GrammarRule rule : grammar.getRules()) {
-            // Пытаемся найти, где было применено правило
             for (int i = 0; i < from.length(); i++) {
                 if (from.charAt(i) == rule.getLeftPart().charAt(0)) {
                     String expected = from.substring(0, i) + rule.getRightPart() + from.substring(i + 1);
@@ -174,13 +155,75 @@ public class ChainGenerator {
         return "Неизвестное правило";
     }
 
-    public List<ChainGenerationStep> getGenerationSteps() {
-        return Collections.unmodifiableList(generationSteps);
+    public List<ChainGenerationStep> getStepsForChain(String chain) {
+        List<ChainGenerationStep> steps = new ArrayList<>();
+        int stepNum = 1;
+
+        steps.add(new ChainGenerationStep(stepNum++, "S", "Начальный символ"));
+
+        List<List<String>> allPaths = findAllGenerationPaths("S", chain, new ArrayList<>());
+
+        if (!allPaths.isEmpty()) {
+            List<String> path = allPaths.get(0);
+            for (int i = 1; i < path.size(); i++) {
+                String from = path.get(i-1);
+                String to = path.get(i);
+                String rule = findRuleBetween(from, to);
+                steps.add(new ChainGenerationStep(stepNum++, to,
+                        rule != null ? rule : "Шаг генерации"));
+            }
+        }
+
+        return steps;
     }
 
-    public List<ChainGenerationStep> getStepsForChain(String chain) {
-        return generationSteps.stream()
-                .filter(step -> step.getChain().equals(chain))
-                .collect(Collectors.toList());
+    private List<List<String>> findAllGenerationPaths(String current, String target, List<String> path) {
+        List<List<String>> result = new ArrayList<>();
+        List<String> newPath = new ArrayList<>(path);
+        newPath.add(current);
+
+        if (current.equals(target)) {
+            result.add(newPath);
+            return result;
+        }
+
+        if (current.length() > target.length() + 5) {
+            return result;
+        }
+
+        for (int i = 0; i < current.length(); i++) {
+            if (Character.isUpperCase(current.charAt(i))) {
+                char nonTerminal = current.charAt(i);
+
+                for (GrammarRule rule : grammar.getRules()) {
+                    if (rule.getLeftPart().charAt(0) == nonTerminal) {
+                        String newChain = current.substring(0, i) +
+                                rule.getRightPart() +
+                                current.substring(i + 1);
+
+                        result.addAll(findAllGenerationPaths(newChain, target, newPath));
+                    }
+                }
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    private String findRuleBetween(String from, String to) {
+        for (GrammarRule rule : grammar.getRules()) {
+            for (int i = 0; i < from.length(); i++) {
+                if (from.charAt(i) == rule.getLeftPart().charAt(0)) {
+                    String expected = from.substring(0, i) +
+                            rule.getRightPart() +
+                            from.substring(i + 1);
+                    if (expected.equals(to)) {
+                        return rule.toString();
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

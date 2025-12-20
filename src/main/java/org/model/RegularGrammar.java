@@ -32,7 +32,6 @@ public class RegularGrammar {
         stateToNonTerminal.clear();
         nonTerminalToState.clear();
 
-        // Генерируем состояния для отслеживания кратности
         for (int i = 0; i < lengthMultiplicity; i++) {
             char nonTerm = nextNonTerminal();
             stateToNonTerminal.put(i, nonTerm);
@@ -47,11 +46,7 @@ public class RegularGrammar {
     }
 
     private void generateRightLinearGrammar() {
-        // Для правосторонней грамматики
-
-        // 1. Правило для начальной подцепочки
         if (!initialChain.isEmpty()) {
-            // Находим состояние после начальной подцепочки
             int stateAfterInitial = (initialChain.length() % lengthMultiplicity);
             char targetState = stateToNonTerminal.get(stateAfterInitial);
             rules.add(new GrammarRule("S", initialChain + targetState,
@@ -61,7 +56,6 @@ public class RegularGrammar {
                     "Начало с состояния A"));
         }
 
-        // 2. Правила для генерации произвольных символов
         for (int currentState = 0; currentState < lengthMultiplicity; currentState++) {
             char currentNonTerm = stateToNonTerminal.get(currentState);
             int nextState = (currentState + 1) % lengthMultiplicity;
@@ -75,12 +69,9 @@ public class RegularGrammar {
             }
         }
 
-        // 3. Правила для генерации конечной подцепочки из состояний,
-        //    которые после добавления конечной цепочки дадут длину, кратную multiplicity
         if (!finalChain.isEmpty()) {
             addFinalChainRulesRightLinear();
         } else {
-            // Если конечная подцепочка пуста, разрешаем завершение из состояния 0
             char zeroState = stateToNonTerminal.get(0);
             rules.add(new GrammarRule(String.valueOf(zeroState), "",
                     "Пустое завершение из состояния 0"));
@@ -88,14 +79,9 @@ public class RegularGrammar {
     }
 
     private void addFinalChainRulesRightLinear() {
-        // Длина конечной подцепочки
         int finalLength = finalChain.length();
 
-        // Ищем состояния, из которых можно добавить конечную подцепочку
-        // и получить общую длину, кратную lengthMultiplicity
         for (int state = 0; state < lengthMultiplicity; state++) {
-            // Проверяем: если текущее состояние + длина конечной подцепочки дает длину, кратную multiplicity
-            // то из этого состояния можно генерировать конечную подцепочку
             if ((state + finalLength) % lengthMultiplicity == 0) {
                 char startState = stateToNonTerminal.get(state);
 
@@ -103,24 +89,19 @@ public class RegularGrammar {
                     rules.add(new GrammarRule(String.valueOf(startState), finalChain,
                             "Завершение конечной подцепочкой из состояния " + state));
                 } else {
-                    // Разбиваем конечную подцепочку на несколько правил
                     String currentLeft = String.valueOf(startState);
 
                     for (int i = 0; i < finalChain.length(); i++) {
                         char symbol = finalChain.charAt(i);
 
                         if (i == finalChain.length() - 1) {
-                            // Последний символ - терминальное правило
                             rules.add(new GrammarRule(currentLeft,
                                     String.valueOf(symbol),
                                     "Завершение конечной подцепочки из состояния " + state));
                         } else {
-                            // Промежуточные символы
-                            // Вычисляем следующее состояние
                             int nextState = (state + i + 1) % lengthMultiplicity;
                             char nextNonTerm;
 
-                            // Используем существующий нетерминал для этого состояния, если он есть
                             if (stateToNonTerminal.containsKey(nextState)) {
                                 nextNonTerm = stateToNonTerminal.get(nextState);
                             } else {
@@ -140,13 +121,8 @@ public class RegularGrammar {
         }
     }
 
-    // Левосторонняя грамматика остается без изменений
     private void generateLeftLinearGrammar() {
-        // Для левосторонней грамматики
-
-        // 1. Правило для конечной подцепочки
         if (!finalChain.isEmpty()) {
-            // Находим состояние перед конечной подцепочкой
             int stateBeforeFinal = (lengthMultiplicity - (finalChain.length() % lengthMultiplicity)) % lengthMultiplicity;
             char startState = stateToNonTerminal.get(stateBeforeFinal);
             rules.add(new GrammarRule("S", startState + finalChain,
@@ -156,10 +132,8 @@ public class RegularGrammar {
                     "Начало с состояния A"));
         }
 
-        // 2. Правила для генерации произвольных символов (в обратном направлении)
         for (int currentState = 0; currentState < lengthMultiplicity; currentState++) {
             char currentNonTerm = stateToNonTerminal.get(currentState);
-            // Для левосторонней грамматики: при добавлении символа слева состояние уменьшается
             int prevState = (currentState - 1 + lengthMultiplicity) % lengthMultiplicity;
             char prevNonTerm = stateToNonTerminal.get(prevState);
 
@@ -171,11 +145,9 @@ public class RegularGrammar {
             }
         }
 
-        // 3. Правила для начальной подцепочки
         if (!initialChain.isEmpty()) {
             addInitialChainRulesLeftLinear();
         } else {
-            // Если начальная подцепочка пуста, разрешаем завершение из состояния 0
             char zeroState = stateToNonTerminal.get(0);
             rules.add(new GrammarRule(String.valueOf(zeroState), "",
                     "Пустое завершение из состояния 0"));
@@ -183,34 +155,25 @@ public class RegularGrammar {
     }
 
     private void addInitialChainRulesLeftLinear() {
-        // Для левосторонней грамматики начальная подцепочка генерируется последней
-
-        // Определяем, из какого состояния нужно начать генерацию начальной подцепочки
-        // Чтобы после добавления начальной подцепочки оказаться в состоянии 0
         int stateBeforeInitial = (initialChain.length() % lengthMultiplicity);
         char startStateForInitial = stateToNonTerminal.get(stateBeforeInitial);
 
-        // Генерируем начальную подцепочку в обратном порядке
         List<Character> reversedInitial = new ArrayList<>();
         for (int i = initialChain.length() - 1; i >= 0; i--) {
             reversedInitial.add(initialChain.charAt(i));
         }
 
-        // Создаем цепочку правил для генерации начальной подцепочки
         String currentLeft = String.valueOf(startStateForInitial);
 
         for (int i = 0; i < reversedInitial.size(); i++) {
             char symbol = reversedInitial.get(i);
 
             if (i == reversedInitial.size() - 1) {
-                // Последний символ начальной подцепочки - завершаем
                 rules.add(new GrammarRule(currentLeft,
                         String.valueOf(symbol),
                         "Завершение начальной подцепочки"));
             } else {
-                // Промежуточные символы
                 char nextNonTerm = nextNonTerminal();
-                // Вычисляем состояние для следующего нетерминала
                 int nextState = (stateBeforeInitial - (i + 1) + lengthMultiplicity) % lengthMultiplicity;
                 stateToNonTerminal.put(nextState, nextNonTerm);
                 nonTerminalToState.put(nextNonTerm, nextState);
@@ -222,34 +185,25 @@ public class RegularGrammar {
             }
         }
 
-        // Правило для перехода из начального состояния S в состояние начала генерации начальной подцепочки
         if (!finalChain.isEmpty()) {
-            // Уже есть правило S -> ... + конечная подцепочка
-            // Добавляем возможность перехода к генерации начальной подцепочки из состояния после конечной
             int stateAfterFinal = (nonTerminalToState.get(stateToNonTerminal.get(
                     (lengthMultiplicity - (finalChain.length() % lengthMultiplicity)) % lengthMultiplicity))
                     + finalChain.length()) % lengthMultiplicity;
 
             if (stateAfterFinal == stateBeforeInitial) {
-                // Нужное состояние уже достижимо
             } else {
-                // Нужно добавить правила для достижения нужного состояния
                 addStateTransitionRules(stateAfterFinal, stateBeforeInitial);
             }
         }
     }
 
     private void addStateTransitionRules(int fromState, int toState) {
-        // Добавляем правила для перехода из одного состояния в другое
-        // через генерацию дополнительных символов
         char fromNonTerm = stateToNonTerminal.get(fromState);
         char toNonTerm = stateToNonTerminal.get(toState);
 
-        // Для правосторонней грамматики: генерируем символы, чтобы изменить состояние
         if (type == GrammarType.RIGHT_LINEAR) {
             int steps = (toState - fromState + lengthMultiplicity) % lengthMultiplicity;
             if (steps > 0) {
-                // Создаем промежуточные правила
                 String currentLeft = String.valueOf(fromNonTerm);
                 for (int i = 0; i < steps; i++) {
                     char intermediateNonTerm = (i == steps - 1) ? toNonTerm : nextNonTerminal();
@@ -270,7 +224,6 @@ public class RegularGrammar {
                 }
             }
         } else {
-            // Для левосторонней грамматики
             int steps = (fromState - toState + lengthMultiplicity) % lengthMultiplicity;
             if (steps > 0) {
                 String currentLeft = String.valueOf(fromNonTerm);
@@ -304,7 +257,6 @@ public class RegularGrammar {
         return result;
     }
 
-    // Геттеры
     public GrammarType getType() { return type; }
     public Set<Character> getAlphabet() { return Collections.unmodifiableSet(alphabet); }
     public String getInitialChain() { return initialChain; }
@@ -317,7 +269,6 @@ public class RegularGrammar {
         sb.append("G = (V, Σ, P, S)\n");
         sb.append("где:\n");
 
-        // Нетерминалы
         sb.append("V = {");
         Set<String> nonTerminals = new TreeSet<>();
         nonTerminals.add("S");
@@ -334,17 +285,14 @@ public class RegularGrammar {
         }
         sb.append(String.join(", ", nonTerminals)).append("}\n");
 
-        // Алфавит
         sb.append("Σ = {");
         sb.append(alphabet.stream()
                 .map(String::valueOf)
                 .collect(Collectors.joining(", ")));
         sb.append("}\n");
 
-        // Начальный символ
         sb.append("S - начальный символ\n");
 
-        // Правила
         sb.append("P = {\n");
         for (GrammarRule rule : rules) {
             sb.append("    ").append(rule).append("\n");

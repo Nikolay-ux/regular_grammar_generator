@@ -7,12 +7,10 @@ import java.awt.*;
 
 public class Main {
     public static void main(String[] args) {
-        // Устанавливаем нативный Look and Feel
         SwingUtilities.invokeLater(() -> {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
-                // Настраиваем некоторые параметры UI
                 UIManager.put("TabbedPane.selected", new Color(200, 220, 255));
                 UIManager.put("TabbedPane.contentAreaColor", new Color(240, 240, 240));
 
@@ -21,11 +19,9 @@ public class Main {
             }
 
             try {
-                // Создаем и показываем главное окно
                 MainFrame view = new MainFrame();
                 new Controller(view);
 
-                // Центрируем окно
                 Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
                 Dimension windowSize = view.getSize();
                 view.setLocation(
