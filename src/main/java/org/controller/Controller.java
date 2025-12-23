@@ -251,10 +251,6 @@ public class Controller {
             currentChainSteps = chainGenerator.getStepsForChain(chain);
         }
 
-        if (currentChainSteps.isEmpty()) {
-            createSimulatedSteps(chain);
-        }
-
         currentStepIndex = 0;
 
         stepTimer = new Timer(1000, new ActionListener() {
@@ -272,37 +268,6 @@ public class Controller {
         });
 
         stepTimer.start();
-    }
-
-    private void createSimulatedSteps(String chain) {
-        currentChainSteps = new ArrayList<>();
-
-        String current = "S";
-        int step = 1;
-
-        currentChainSteps.add(new ChainGenerationStep(step++, current, "Начало"));
-
-        if (!grammar.getInitialChain().isEmpty()) {
-            current = grammar.getInitialChain() + "A";
-            currentChainSteps.add(new ChainGenerationStep(step++, current,
-                    "Применено правило S → " + grammar.getInitialChain() + "A"));
-        }
-
-        int middleLength = chain.length() -
-                grammar.getInitialChain().length() -
-                grammar.getFinalChain().length();
-
-        for (int i = 0; i < middleLength; i++) {
-            current = current.replaceFirst("A", "a" + (i < middleLength - 1 ? "A" : ""));
-            currentChainSteps.add(new ChainGenerationStep(step++, current,
-                    "Применено правило A → aA"));
-        }
-
-        if (!grammar.getFinalChain().isEmpty()) {
-            current = current.replace("A", grammar.getFinalChain());
-            currentChainSteps.add(new ChainGenerationStep(step++, current,
-                    "Применено правило A → " + grammar.getFinalChain()));
-        }
     }
 
     private void exportResults() {
